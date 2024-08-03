@@ -36,6 +36,16 @@ func ExibeAlunoPorId(c *gin.Context) {
 
 }
 
+func DeletaAluno(c *gin.Context) {
+	id := c.Params.ByName("id")
+
+	database.DB.Delete(&models.Aluno{}, id)
+
+	c.JSON(http.StatusNoContent, gin.H{
+		"Status:": "Deletado com sucesso",
+	})
+}
+
 func CriaNovoAluno(c *gin.Context) {
 	var aluno models.Aluno
 
