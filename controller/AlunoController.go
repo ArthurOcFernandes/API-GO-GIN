@@ -39,7 +39,11 @@ func ExibeAlunoPorId(c *gin.Context) {
 func DeletaAluno(c *gin.Context) {
 	id := c.Params.ByName("id")
 
-	database.DB.Delete(&models.Aluno{}, id)
+	var aluno models.Aluno
+
+	database.DB.First(&aluno, id)
+
+	database.DB.Delete(&aluno)
 
 	c.JSON(http.StatusNoContent, gin.H{
 		"Status:": "Deletado com sucesso",
@@ -54,6 +58,13 @@ func CriaNovoAluno(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error:": err.Error(),
 		})
+	}
+
+	if err := models.ValidaDadosDeAluno(&aluno); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error:": err.Error(),
+		})
+		return
 	}
 
 	database.DB.Create(&aluno)
@@ -77,6 +88,13 @@ func EditarAluno(c *gin.Context) {
 		return
 	}
 
+	if err := models.ValidaDadosDeAluno(&aluno); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error:": err.Error(),
+		})
+		return
+	}
+
 	if aluno.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error:": "Aluno não existe no banco de dados",
@@ -84,7 +102,7 @@ func EditarAluno(c *gin.Context) {
 		return
 	}
 
-	database.DB.Model(&aluno).UpdateColumns(aluno)
+	database.DB.Model(&aluno).Updates(aluno)
 	c.JSON(http.StatusOK, aluno)
 }
 
